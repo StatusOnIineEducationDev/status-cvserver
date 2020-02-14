@@ -13,7 +13,7 @@ SAVE_PATH = './data/saved_model'
 def GetSymmetric(pixel, size):
     """
     pixel: np.array with shape (count,size,size,1);
-    size: model size;
+    size: data size;
     return: symmetric np.array with shape (count,size,size,1);
     """
     count = pixel.shape[0]

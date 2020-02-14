@@ -1,9 +1,7 @@
 import cv2
-import time
 import numpy as np
-import math
 
-from src.model import concentration_fun as Fun
+from src.face_detection import concentration_fun as Fun
 
 # 加载所需库文件
 loadFile = Fun.LoadFile()

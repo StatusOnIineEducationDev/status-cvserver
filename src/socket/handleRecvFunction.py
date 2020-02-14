@@ -1,14 +1,16 @@
 import random
 
-from src.network.edu import *
-from src.network.connection import *
+from src.socket.edu import TransportCmd
+from src.socket.connection import *
 from src.utils.base64_decode import base64ToImg
-from src.model.concentration import *
+from src.face_detection.interface import *
 
 
 def studentCameraFrameData(connection, json_obj):
+    uid = json_obj["uid"]
     img = base64ToImg(base64_str=json_obj["frame_mat"])
-    concentration_main(img)
+
+    pic_judge, emotion_index, is_blink, is_yawn, h_angle, v_angle = concentration_main(image)
 
     return_data = {
         "command": TransportCmd.ConcentrationFinalData,

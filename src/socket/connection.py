@@ -1,9 +1,4 @@
-import json
-import socket
-import struct
-
-from src.conf import *
-from src.network.handleRecvFunction import *
+from src.socket.handleRecvFunction import *
 
 
 def connect():

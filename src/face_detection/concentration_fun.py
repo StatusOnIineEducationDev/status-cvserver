@@ -11,16 +11,16 @@ import random
 
 class LoadFile:
     # 【 OpenCV函数 】
-    FACE_URL = "static/shape_predictor_68_face_landmarks.dat"
+    FACE_URL = "src/face_detection/data/shape_predictor_68_face_landmarks.dat"
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor(FACE_URL)
 
     # 【表情识别】
-    cascPath = "static/haarcascade_frontalface_default.xml"
+    cascPath = "src/face_detection/data/haarcascade_frontalface_default.xml"
     faceCascade = cv2.CascadeClassifier(cascPath)
 
     # 【疲劳检测】
-    SAVE_PATH = "static/saved_model"
+    SAVE_PATH = "src/face_detection/data/saved_model"
 
     def Initialize(SAVE_PATH):
         '''

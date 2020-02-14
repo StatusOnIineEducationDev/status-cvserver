@@ -1,6 +1,4 @@
-from src.network.connection import *
-from src.model import concentration_fun as Fun
-
+from src.socket.connection import *
 
 if __name__ == '__main__':
     # # 连接主服务器
