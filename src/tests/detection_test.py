@@ -1,9 +1,9 @@
-from src.socket.connection import *
+import cv2
+
+from src.face_detection.interface import concentration_main, concentration_calculation
+from src.server.socket.connection import connect
 
 if __name__ == '__main__':
-    # # 连接主服务器
-    # connect()
-
     # 测试
     cap = cv2.VideoCapture(0)
     concentration_score = 60
@@ -45,6 +45,3 @@ if __name__ == '__main__':
         key = cv2.waitKey(50)
         if key == ord('q'):
             break
-
-
-
