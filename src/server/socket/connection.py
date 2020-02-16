@@ -3,7 +3,7 @@ import json
 
 from src.conf.conf import HOST, PORT
 from src.server.socket.edu import TransportCmd
-from src.server.handleRecvFunction import handleRecvData
+from src.server.socket.handle_recv import handleRecvData
 from src.server.socket.socket_utils import send
 
 

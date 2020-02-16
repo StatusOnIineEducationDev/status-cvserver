@@ -1,7 +1,7 @@
 import cv2
 
-from src.face_detection.interface import concentration_main, concentration_calculation
-from src.server.redis_pro_utils import RedisForConc
+from src.face_detection.interface import concentration_main
+from src.server.redis_proj_utils import RedisForConc
 
 if __name__ == '__main__':
     # 测试
@@ -16,10 +16,10 @@ if __name__ == '__main__':
             continue
 
         is_succeed, emotion_index, is_blinked, is_yawned, h_angle, v_angle = concentration_main(image)
-        conc.addDetailsRecord(uid='10001', course_id='302',
-                              lesson_id='4021', timestamp=123123123,
-                              emotion=emotion_index, is_blinked=is_blinked, is_yawned=is_yawned,
-                              h_angle=h_angle, v_angle=v_angle)
+        conc.addDetails(uid='10001', course_id='302',
+                        lesson_id='4021', timestamp=123123123,
+                        emotion=emotion_index, is_blinked=is_blinked, is_yawned=is_yawned,
+                        h_angle=h_angle, v_angle=v_angle)
         print(is_succeed)
 
         cv2.imshow("Output", image)

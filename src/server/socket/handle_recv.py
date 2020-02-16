@@ -1,10 +1,9 @@
 import random
 
+from src.server.service.conc import detect
 from src.server.socket.edu import TransportCmd
 from src.server.socket.socket_utils import send
 from src.utils.base64_decode import base64ToImg
-from src.face_detection.interface import concentration_main
-from src.server.redis_pro_utils import RedisForConcDetails
 
 
 def handleRecvData(conn, json_obj):
@@ -22,15 +21,17 @@ def handleRecvData(conn, json_obj):
         studentCameraFrameData(conn, json_obj)
 
 
-def studentCameraFrameData(connection, json_obj):
-    conc_details = RedisForConcDetails()
+def studentCameraFrameData(conn, json_obj):
+    """ 处理主服务器发送过来的帧数据
 
+    :param conn: socket连接
+    :param json_obj: 数据包
+    :return:
+    """
     img = base64ToImg(base64_str=json_obj['frame_mat'])
-    is_succeed, emotion_index, is_blinked, is_yawned, h_angle, v_angle = concentration_main(img)
-    conc_details.add(uid=json_obj['uid'], course_id=json_obj['course_id'],
-                     lesson_id=json_obj['lesson_id'], timestamp=json_obj['concentration_timestamp'],
-                     emotion=emotion_index, is_blinked=is_blinked, is_yawned=is_yawned,
-                     h_angle=h_angle, v_angle=v_angle)
+
+    detect(img=img, uid=json_obj['uid'], course_id=json_obj['course_id'],
+           lesson_id=json_obj['lesson_id'], timestamp=json_obj['concentration_timestamp'])
 
     return_data = {
         'command': TransportCmd.ConcentrationFinalData,
@@ -44,4 +45,4 @@ def studentCameraFrameData(connection, json_obj):
         'concentration_timestamp': json_obj["concentration_timestamp"]
     }
 
-    send(connection, return_data)
+    send(conn, return_data)

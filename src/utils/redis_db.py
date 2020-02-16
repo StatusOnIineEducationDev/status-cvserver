@@ -14,13 +14,13 @@ class Redis:
             注意Redis后的括号不能漏
             因为每一条连接都隶属一个对象，单是类名并不是一个对象
     """
-    pool = None
+    __pool = None
 
     def __init__(self):
-        if Redis.pool is None:
+        if Redis.__pool is None:
             Redis.createConnectionPool()
-        self.conn = redis.Redis(connection_pool=Redis.pool, decode_responses=True)
+        self.conn = redis.Redis(connection_pool=Redis.__pool, decode_responses=True)
 
     @staticmethod
     def createConnectionPool():
-        redis.ConnectionPool(host=REDIS_HOST, port=REDIS_PORT)
+        Redis.__pool = redis.ConnectionPool(host=REDIS_HOST, port=REDIS_PORT)
