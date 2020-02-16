@@ -1,7 +1,6 @@
 import cv2
 
 from src.face_detection.interface import concentration_main, concentration_calculation
-from src.server.socket.connection import connect
 
 if __name__ == '__main__':
     # 测试
