@@ -1,5 +1,6 @@
 from src.face_detection.interface import concentration_main, concentration_calculation
-from src.server.redis_proj_utils import RedisForConc
+from src.server.redis_proj_utils import RedisForDetails, RedisForConc
+from src.utils.mysql_db import createMysqlConnection
 
 
 def handleSingleFrame(img, uid, course_id, lesson_id, timestamp):
@@ -17,16 +18,16 @@ def handleSingleFrame(img, uid, course_id, lesson_id, timestamp):
 
     is_succeed, emotion_index, is_blinked, is_yawned, h_angle, v_angle = concentration_main(img)
 
-    redis_conc = RedisForConc()
-    redis_conc.addDetail(is_succeed=is_succeed, uid=uid, course_id=course_id,
-                         lesson_id=lesson_id, timestamp=timestamp, emotion=emotion_index,
-                         is_blinked=is_blinked, is_yawned=is_yawned, h_angle=h_angle, v_angle=v_angle)
+    redis_details = RedisForDetails()
+    redis_details.addDetail(is_succeed=is_succeed, uid=uid, course_id=course_id,
+                            lesson_id=lesson_id, timestamp=timestamp, emotion=emotion_index,
+                            is_blinked=is_blinked, is_yawned=is_yawned, h_angle=h_angle, v_angle=v_angle)
     if is_succeed:
-        is_full = redis_conc.addUsefulDetail(is_succeed=is_succeed, uid=uid, course_id=course_id,
-                                             lesson_id=lesson_id, timestamp=timestamp,
-                                             emotion=emotion_index,
-                                             is_blinked=is_blinked, is_yawned=is_yawned, h_angle=h_angle,
-                                             v_angle=v_angle)
+        is_full = redis_details.addUsefulDetail(is_succeed=is_succeed, uid=uid, course_id=course_id,
+                                                lesson_id=lesson_id, timestamp=timestamp,
+                                                emotion=emotion_index,
+                                                is_blinked=is_blinked, is_yawned=is_yawned, h_angle=h_angle,
+                                                v_angle=v_angle)
 
     return is_full, is_succeed, emotion_index
 
@@ -38,7 +39,8 @@ def detectConc(uid):
     :return:
     """
     redis_conc = RedisForConc()
-    dict_list = redis_conc.getUsefulDetails(uid)
+    redis_details = RedisForDetails()
+    dict_list = redis_details.getUsefulDetails(uid)
 
     emotion_arr = [0, 0, 0, 0, 0, 0, 0]
     blink_times = 0
@@ -64,3 +66,32 @@ def detectConc(uid):
                              conc_score=conc_score)
 
     return conc_score
+
+
+def dumpToMysql(lesson_id):
+    """ 把专注度数据转储到mysql中
+
+    :param lesson_id: 课程下课堂唯一标识
+    :return:
+    """
+    mysql_cursor = createMysqlConnection().cursor()
+
+    redis_conc = RedisForConc()
+    dict_list = redis_conc.getConcRecords(lesson_id)
+
+    # 这里采取的是同时执行多条的sql指令
+    # executemany效率更高
+    val_list = []
+    for record_dict in dict_list:
+        # 注意里面必须是元组
+        val_list.append((record_dict['course_id'],
+                         record_dict['lesson_id'],
+                         record_dict['uid'],
+                         record_dict['conc_score'],
+                         record_dict['begin_timestamp'],
+                         record_dict['end_timestamp']))
+
+    sql = "INSERT INTO " \
+          "monitoring_record (course_id, lesson_id, uid, concentration_value, begin_timestamp, end_timestamp) " \
+          "VALUES (%s, %s, %s, %s, %s, %s)"
+    mysql_cursor.executemany(sql, val_list)

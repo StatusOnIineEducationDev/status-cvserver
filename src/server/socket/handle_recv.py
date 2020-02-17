@@ -50,3 +50,13 @@ def studentCameraFrameData(conn, json_obj):
     }
 
     send(conn, return_data)
+
+
+def lessonEndHandleFunction(conn, json_obj):
+    """
+
+    :param conn:
+    :param json_obj:
+    :return:
+    """
+    pass
