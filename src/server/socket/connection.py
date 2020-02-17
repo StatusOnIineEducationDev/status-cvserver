@@ -1,5 +1,7 @@
 import socket
 import json
+import time
+import _thread
 
 from src.conf.conf import HOST, PORT
 from src.server.socket.edu import TransportCmd
@@ -22,8 +24,10 @@ def connect():
     }
     send(conn, request_data)
 
+    # 心跳机制
+    _thread.start_new_thread(keepAlive, (conn,))
     # 开始循环监听
-    recv(conn)
+    _thread.start_new_thread(recv, (conn,))
 
 
 def recv(conn):
@@ -70,6 +74,20 @@ def recv(conn):
 
             if len(recv_bytes) < 4 or pack_len != -1:
                 break
+
+
+def keepAlive(conn):
+    """ 定时（5秒）向主服务器发送一个心跳包
+
+    :param conn: socket连接
+    :return:
+    """
+    request_data = {
+        "command": TransportCmd.KeepAlive
+    }
+    while True:
+        send(conn, request_data)
+        time.sleep(5)
 
 
 

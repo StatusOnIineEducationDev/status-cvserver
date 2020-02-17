@@ -1,6 +1,6 @@
 import random
 
-from src.server.service.conc import detect
+from src.server.service.conc import handleSingleFrame, detectConc
 from src.server.socket.edu import TransportCmd
 from src.server.socket.socket_utils import send
 from src.utils.base64_decode import base64ToImg
@@ -28,20 +28,24 @@ def studentCameraFrameData(conn, json_obj):
     :param json_obj: 数据包
     :return:
     """
-    img = base64ToImg(base64_str=json_obj['frame_mat'])
+    conc_score = -1
 
-    detect(img=img, uid=json_obj['uid'], course_id=json_obj['course_id'],
-           lesson_id=json_obj['lesson_id'], timestamp=json_obj['concentration_timestamp'])
+    img = base64ToImg(base64_str=json_obj['frame_mat'])
+    is_full, is_succeed, emotion = handleSingleFrame(img=img, uid=json_obj['uid'],
+                                                     course_id=json_obj['course_id'],
+                                                     lesson_id=json_obj['lesson_id'],
+                                                     timestamp=json_obj['concentration_timestamp'])
+    if is_full:
+        conc_score = detectConc(json_obj['uid'])
 
     return_data = {
         'command': TransportCmd.ConcentrationFinalData,
+        'is_succeed': is_succeed,
         'course_id': json_obj['course_id'],
         'lesson_id': json_obj['lesson_id'],
         'uid': json_obj['uid'],
-        'concentration_value': random.randint(0, 100),
-        'fatigue_value': random.randint(0, 100),
-        'toward_score': random.randint(0, 100),
-        'emotion_score': random.randint(0, 100),
+        'concentration_value': conc_score,
+        'emotion': emotion,
         'concentration_timestamp': json_obj["concentration_timestamp"]
     }
 

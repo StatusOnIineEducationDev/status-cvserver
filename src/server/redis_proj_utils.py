@@ -27,8 +27,8 @@ class RedisForConc:
     def __init__(self):
         self.__conn = Redis().conn
 
-    def addDetails(self, is_succeed, uid, course_id, lesson_id, timestamp, emotion,
-                   is_blinked, is_yawned, h_angle, v_angle):
+    def addDetail(self, is_succeed, uid, course_id, lesson_id, timestamp, emotion,
+                  is_blinked, is_yawned, h_angle, v_angle):
         """ 插入一条详细记录
 
             详细记录是生成最终专注度记录的依据
@@ -89,8 +89,8 @@ class RedisForConc:
         # 需先dict转换为str
         self.__conn.lpush(key, json.dumps(record_dict))
 
-    def addUsefulDetails(self, is_succeed, uid, course_id, lesson_id, timestamp, emotion,
-                         is_blinked, is_yawned, h_angle, v_angle):
+    def addUsefulDetail(self, is_succeed, uid, course_id, lesson_id, timestamp, emotion,
+                        is_blinked, is_yawned, h_angle, v_angle):
         """ 插入一条能用于生成最终记录的详细记录
 
         :param is_succeed: 是否成功识别到图像中的人脸（该条记录是否有用）
@@ -124,15 +124,25 @@ class RedisForConc:
         # redis的list中不能直接存储dict类型
         # 需先dict转换为str
         #
-        # 满10条记录后会返回True，以及10条json格式数据列表
-        # 否则返回False，以及返回None
+        # 满10条记录后会返回True
         if self.__conn.lpush(key, json.dumps(record_dict)) >= 10:
-            dict_list = []
-            str_list = self.__conn.lrange(key, 0, 9)
-            for dict_str in str_list:
-                dict_list.append(json.loads(dict_str))
-            self.__conn.delete(key)
-
-            return True, dict_list
+            return True
         else:
-            return False, []
+            return False
+
+    def getUsefulDetails(self, uid):
+        """ 获取并清空可用的十条详细记录
+
+        :param uid: 用户唯一标识
+        :return:
+            json格式数据
+        """
+        # format: STATUS:CONC_USEFUL_DETAILS:UID:xxx
+        key = self.__CONC_USEFUL_DETAILS_PREFIX + ':' + uid
+        dict_list = []
+        str_list = self.__conn.lrange(key, 0, 9)
+        for dict_str in str_list:
+            dict_list.append(json.loads(dict_str))
+        self.__conn.delete(key)
+
+        return dict_list

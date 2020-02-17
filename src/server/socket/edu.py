@@ -1,4 +1,5 @@
 class TransportCmd:
+    KeepAlive = 1
     TestCommand = 100
     ConcentrationFinalData = 101
     StudentCameraFrameData = 102
